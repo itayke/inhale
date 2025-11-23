@@ -41,34 +41,61 @@ ESP32-based interactive breathing visualization system using pressure sensing an
 - **Stats Mode**: View session metrics
 
 ### Breath Gesture Navigation
-- **Double Puff** (2 quick exhales): Select/Enter
-- **Long Exhale** (2+ sec): Next option/mode
-- **Long Inhale** (2+ sec): Previous option/mode
-- **Breath Hold** (5+ sec): Menu toggle
+- **Long Exhale** (1.5+ sec): Next mode
+- **Long Inhale** (1.5+ sec): Previous mode
+- **Breath Hold** (5+ sec): Reset session
 
-(Physical button support planned for future)
+(Physical button support can be added later)
 
 ## Setup
 
-1. Install PlatformIO
+### Hardware Assembly
+
+See **[HARDWARE_SETUP.md](HARDWARE_SETUP.md)** for detailed wiring instructions with diagrams.
+
+**Quick reference:**
+- BMP280 → I2C (GPIO 21/22)
+- ST7735S → SPI (GPIO 23, 18, 15, 2, 4)
+- All components use 3.3V power
+
+### Software Upload
+
+1. Install [PlatformIO](https://platformio.org/install) or VS Code + PlatformIO extension
 2. Clone this repository
-3. Connect hardware according to pin configuration
+3. Connect ESP32 via USB-C
 4. Build and upload:
    ```bash
    pio run --target upload
+   pio device monitor
    ```
+
+## Project Structure
+
+The codebase uses a modular architecture for maintainability:
+
+```
+src/
+├── main.cpp              # Application orchestration
+├── config.h              # Configuration & constants
+├── hardware/             # Hardware abstraction (display, sensor, storage)
+├── detection/            # Breath & gesture detection algorithms
+└── modes/                # Visualization modes (live, guided, calib, stats)
+```
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed module documentation.
 
 ## Development Status
 
-- [x] Project structure
+- [x] Modular architecture
 - [x] Hardware initialization
-- [x] Basic pressure reading
+- [x] Pressure reading & calibration
 - [x] Breath detection algorithm
-- [x] Gesture detection framework
-- [ ] Wave/water visualization
-- [ ] Guided breathing mode
-- [ ] Calibration UI
-- [ ] Complete session tracking
+- [x] Gesture recognition
+- [x] Wave/water visualization
+- [x] Guided breathing mode (4-7-8 pattern)
+- [x] Calibration UI
+- [x] Session statistics tracking
+- [x] NVS persistent storage
 
 ## Data Persistence
 
