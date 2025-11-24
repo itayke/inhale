@@ -20,8 +20,8 @@ The BMP280 uses I2C communication (2 wires for data).
 |------------|-----------|----------------------|
 | VCC        | 3.3V      | Red                  |
 | GND        | GND       | Black                |
-| SDA        | GPIO 21   | Blue                 |
-| SCL        | GPIO 22   | Yellow               |
+| SDA        | D21 (GPIO 21) | Blue             |
+| SCL / SCK  | D22 (GPIO 22) | Yellow           |
 
 **Notes:**
 - Some BMP280 modules work with 5V, but use **3.3V** to be safe
@@ -36,12 +36,12 @@ The display uses SPI communication (faster, more wires).
 |-------------|-----------|----------------------|
 | VCC         | 3.3V      | Red                  |
 | GND         | GND       | Black                |
-| SCL/SCLK    | GPIO 18   | Yellow               |
-| SDA/MOSI    | GPIO 23   | Blue                 |
-| CS          | GPIO 15   | Green                |
-| DC/RS       | GPIO 2    | Orange               |
-| RST/RESET   | GPIO 4    | White                |
-| LED (BL)    | 3.3V      | Red (optional)       |
+| SCL / SCLK / SCK | D18 (GPIO 18) | Yellow        |
+| SDA / MOSI  | D23 (GPIO 23) | Blue              |
+| CS          | D15 (GPIO 15) | Green             |
+| DC / RS / A0 | D2 (GPIO 2)  | Orange            |
+| RST / RESET | D4 (GPIO 4)   | White             |
+| LED / BL    | 3.3V      | Red (optional)       |
 
 **Notes:**
 - Display **must** be 3.3V version (not 5V)
