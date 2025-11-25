@@ -11,10 +11,107 @@
 #include "modes/stats_mode.h"
 
 // ========================================
+// Diagnostic Mode (temporary)
+// ========================================
+#define DIAGNOSTIC_MODE false
+
+// ========================================
 // Global Application State
 // ========================================
 AppMode currentMode = MODE_LIVE;
 BreathData breathData;
+
+// ========================================
+// Diagnostic Display
+// ========================================
+void drawDiagnosticStatic() {
+  // Draw static elements once
+  Adafruit_ST7735& tft = getDisplay();
+  tft.fillScreen(ST77XX_BLACK);
+
+  // Title
+  tft.setCursor(10, 10);
+  tft.setTextColor(ST77XX_YELLOW);
+  tft.setTextSize(1);
+  tft.println("DIAGNOSTIC MODE");
+
+  // Pressure label
+  tft.setCursor(10, 35);
+  tft.setTextColor(ST77XX_WHITE);
+  tft.setTextSize(1);
+  tft.print("Pressure Delta:");
+
+  // Bar baseline
+  int barY = 80;
+  tft.drawFastHLine(10, barY, SCREEN_WIDTH - 20, ST77XX_GRAY);
+  tft.drawFastVLine(SCREEN_WIDTH / 2, barY - 5, 10, ST77XX_WHITE);
+
+  // Temperature label
+  tft.setCursor(10, 100);
+  tft.setTextColor(ST77XX_WHITE);
+  tft.setTextSize(1);
+  tft.print("Temperature:");
+}
+
+void drawDiagnostic(float pressureDelta) {
+  static unsigned long lastUpdate = 0;
+  static bool firstRun = true;
+
+  unsigned long now = millis();
+  if (now - lastUpdate < 100) return;  // 10 FPS
+  lastUpdate = now;
+
+  Adafruit_ST7735& tft = getDisplay();
+
+  // Draw static elements on first run
+  if (firstRun) {
+    drawDiagnosticStatic();
+    firstRun = false;
+  }
+
+  // Clear only the dynamic pressure value area
+  tft.fillRect(10, 50, 110, 20, ST77XX_BLACK);
+
+  // Draw pressure value
+  tft.setCursor(10, 50);
+  tft.setTextSize(2);
+  if (pressureDelta >= 0) {
+    tft.setTextColor(ST77XX_CYAN);
+    tft.print("+");
+  } else {
+    tft.setTextColor(ST77XX_MAGENTA);
+  }
+  tft.print(pressureDelta, 1);
+  tft.setTextSize(1);
+  tft.print(" Pa");
+
+  // Clear and redraw bar
+  int barY = 80;
+  int barCenter = SCREEN_WIDTH / 2;
+  int barWidth = constrain(abs(pressureDelta) * 2, 0, 50);
+
+  // Clear bar area (but preserve center line)
+  tft.fillRect(10, barY - 3, SCREEN_WIDTH - 20, 6, ST77XX_BLACK);
+  tft.drawFastHLine(10, barY, SCREEN_WIDTH - 20, ST77XX_GRAY);
+  tft.drawFastVLine(barCenter, barY - 5, 10, ST77XX_WHITE);
+
+  // Draw new bar
+  if (pressureDelta > 0) {
+    tft.fillRect(barCenter, barY - 3, barWidth, 6, ST77XX_CYAN);
+  } else {
+    tft.fillRect(barCenter - barWidth, barY - 3, barWidth, 6, ST77XX_MAGENTA);
+  }
+
+  // Clear and draw temperature
+  tft.fillRect(10, 115, 80, 16, ST77XX_BLACK);
+  tft.setCursor(10, 115);
+  tft.setTextSize(2);
+  tft.setTextColor(ST77XX_ORANGE);
+  float temp = getTemperature();
+  tft.print(temp, 1);
+  tft.setTextSize(1);
+  tft.print(" C");
+}
 
 // ========================================
 // Helper Functions
@@ -57,9 +154,9 @@ void setup() {
   Serial.println("Inhale - Breath Visualization Device");
   Serial.println("====================================");
 
-  // Initialize hardware
-  displayInit();
+  // Initialize hardware (sensor first to avoid I2C conflicts)
   sensorInit();
+  displayInit();
   storageInit();
 
   // Initialize detection systems
@@ -82,6 +179,13 @@ void loop() {
   // Update sensor readings
   updatePressure();
   float pressureDelta = getPressureDelta();
+
+#if DIAGNOSTIC_MODE
+  // Simple diagnostic display
+  drawDiagnostic(pressureDelta);
+  delay(MAIN_LOOP_DELAY_MS);
+  return;
+#endif
 
   // Detect breath state
   detectBreath(breathData, pressureDelta);

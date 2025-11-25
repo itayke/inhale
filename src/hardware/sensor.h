@@ -13,4 +13,7 @@ void updatePressure();
 // Get current pressure delta from baseline
 float getPressureDelta();
 
+// Get current temperature in Celsius
+float getTemperature();
+
 #endif // SENSOR_H

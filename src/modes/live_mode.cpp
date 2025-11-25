@@ -3,6 +3,14 @@
 #include "../hardware/display.h"
 #include <Arduino.h>
 
+// Double-buffer canvas to eliminate flicker
+static GFXcanvas16 canvas(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+// Helper to convert RGB to 565 format (canvas doesn't have color565)
+static uint16_t rgb565(uint8_t r, uint8_t g, uint8_t b) {
+  return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
+}
+
 void drawLiveMode(const BreathData& breathData, float pressureDelta) {
   static unsigned long lastUpdate = 0;
   static float wavePhase = 0;
@@ -33,31 +41,31 @@ void drawLiveMode(const BreathData& breathData, float pressureDelta) {
   uint16_t waterColor, foamColor;
   switch (breathData.currentState) {
     case BREATH_INHALE:
-      waterColor = tft.color565(0, 100, 200);    // Deep blue
-      foamColor = tft.color565(100, 150, 255);   // Light blue
+      waterColor = rgb565(0, 100, 200);    // Deep blue
+      foamColor = rgb565(100, 150, 255);   // Light blue
       break;
     case BREATH_EXHALE:
-      waterColor = tft.color565(0, 150, 200);    // Cyan
-      foamColor = tft.color565(150, 255, 255);   // Bright cyan
+      waterColor = rgb565(0, 150, 200);    // Cyan
+      foamColor = rgb565(150, 255, 255);   // Bright cyan
       break;
     case BREATH_HOLD:
-      waterColor = tft.color565(100, 0, 150);    // Purple
-      foamColor = tft.color565(200, 100, 255);   // Light purple
+      waterColor = rgb565(100, 0, 150);    // Purple
+      foamColor = rgb565(200, 100, 255);   // Light purple
       break;
     default:
-      waterColor = tft.color565(0, 120, 180);    // Medium blue
-      foamColor = tft.color565(120, 180, 255);   // Sky blue
+      waterColor = rgb565(0, 120, 180);    // Medium blue
+      foamColor = rgb565(120, 180, 255);   // Sky blue
       break;
   }
 
-  // Clear screen - sky gradient
+  // Draw sky gradient to canvas
   for (int y = 0; y < SCREEN_HEIGHT; y++) {
     uint8_t brightness = map(y, 0, SCREEN_HEIGHT, 60, 20);
-    uint16_t skyColor = tft.color565(brightness, brightness, brightness + 30);
-    tft.drawFastHLine(0, y, SCREEN_WIDTH, skyColor);
+    uint16_t skyColor = rgb565(brightness, brightness, brightness + 30);
+    canvas.drawFastHLine(0, y, SCREEN_WIDTH, skyColor);
   }
 
-  // Draw multi-layer wave for depth
+  // Draw multi-layer wave for depth to canvas
   for (int x = 0; x < SCREEN_WIDTH; x++) {
     // Primary wave (main surface)
     float wave1 = sin(x * 0.15 + wavePhase) * 8;
@@ -71,24 +79,24 @@ void drawLiveMode(const BreathData& breathData, float pressureDelta) {
 
     // Draw foam/crest (lighter color at wave peak)
     int foamHeight = abs((int)wave1) / 2 + 2;
-    tft.drawFastVLine(x, waveY - foamHeight, foamHeight, foamColor);
+    canvas.drawFastVLine(x, waveY - foamHeight, foamHeight, foamColor);
 
     // Draw water body below wave
-    tft.drawFastVLine(x, waveY, SCREEN_HEIGHT - waveY, waterColor);
+    canvas.drawFastVLine(x, waveY, SCREEN_HEIGHT - waveY, waterColor);
   }
 
-  // Draw HUD overlay
-  tft.setCursor(4, 4);
-  tft.setTextColor(ST77XX_WHITE);
-  tft.setTextSize(1);
+  // Draw HUD overlay to canvas
+  canvas.setCursor(4, 4);
+  canvas.setTextColor(ST77XX_WHITE);
+  canvas.setTextSize(1);
 
   // Mode indicator
-  tft.print("LIVE");
+  canvas.print("LIVE");
 
   // Breath count
-  tft.setCursor(4, SCREEN_HEIGHT - 10);
-  tft.print("Breaths: ");
-  tft.print(breathData.breathCount);
+  canvas.setCursor(4, SCREEN_HEIGHT - 10);
+  canvas.print("Breaths: ");
+  canvas.print(breathData.breathCount);
 
   // Breath state indicator (top right)
   const char* stateText;
@@ -98,6 +106,9 @@ void drawLiveMode(const BreathData& breathData, float pressureDelta) {
     case BREATH_HOLD:   stateText = "HLD"; break;
     default:            stateText = "..."; break;
   }
-  tft.setCursor(SCREEN_WIDTH - 22, 4);
-  tft.print(stateText);
+  canvas.setCursor(SCREEN_WIDTH - 22, 4);
+  canvas.print(stateText);
+
+  // Blit canvas to display in one operation
+  tft.drawRGBBitmap(0, 0, canvas.getBuffer(), SCREEN_WIDTH, SCREEN_HEIGHT);
 }

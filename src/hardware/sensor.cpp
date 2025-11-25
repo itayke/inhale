@@ -8,6 +8,7 @@ static Adafruit_BMP280 bmp;
 static float baselinePressure = 0;
 static float currentPressure = 0;
 static float pressureDelta = 0;
+static float currentTemperature = 0;
 
 void sensorInit() {
   Serial.println("Initializing BMP280 sensor...");
@@ -57,8 +58,13 @@ void calibrateBaseline() {
 void updatePressure() {
   currentPressure = bmp.readPressure();
   pressureDelta = currentPressure - baselinePressure;
+  currentTemperature = bmp.readTemperature();
 }
 
 float getPressureDelta() {
   return pressureDelta;
+}
+
+float getTemperature() {
+  return currentTemperature;
 }
