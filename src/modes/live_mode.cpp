@@ -3,14 +3,6 @@
 #include "../hardware/display.h"
 #include <Arduino.h>
 
-// Double-buffer canvas to eliminate flicker
-static GFXcanvas16 canvas(SCREEN_WIDTH, SCREEN_HEIGHT);
-
-// Helper to convert RGB to 565 format (canvas doesn't have color565)
-static uint16_t rgb565(uint8_t r, uint8_t g, uint8_t b) {
-  return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
-}
-
 void drawLiveMode(const BreathData& breathData, float pressureDelta) {
   static unsigned long lastUpdate = 0;
   static float wavePhase = 0;
@@ -22,7 +14,7 @@ void drawLiveMode(const BreathData& breathData, float pressureDelta) {
   float dt = (now - lastUpdate) / 1000.0;
   lastUpdate = now;
 
-  Adafruit_ST7735& tft = getDisplay();
+  GFXcanvas16& canvas = getCanvas();
 
   // Animate wave phase (horizontal scroll)
   wavePhase += 2.5 * dt;
@@ -109,6 +101,6 @@ void drawLiveMode(const BreathData& breathData, float pressureDelta) {
   canvas.setCursor(SCREEN_WIDTH - 22, 4);
   canvas.print(stateText);
 
-  // Blit canvas to display in one operation
-  tft.drawRGBBitmap(0, 0, canvas.getBuffer(), SCREEN_WIDTH, SCREEN_HEIGHT);
+  // Blit canvas to display
+  displayBlit();
 }

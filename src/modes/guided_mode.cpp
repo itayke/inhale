@@ -18,7 +18,7 @@ void drawGuidedMode(BreathData& breathData) {
   if (now - lastUpdate < (1000 / GUIDED_UPDATE_FPS)) return;
   lastUpdate = now;
 
-  Adafruit_ST7735& tft = getDisplay();
+  GFXcanvas16& canvas = getCanvas();
 
   // Initialize guided phase start time if needed
   if (guidedPhaseStart == 0) {
@@ -35,17 +35,17 @@ void drawGuidedMode(BreathData& breathData) {
     case GUIDE_INHALE:
       phaseDuration = INHALE_DURATION;
       phaseText = "BREATHE IN";
-      phaseColor = tft.color565(100, 200, 255); // Light blue
+      phaseColor = rgb565(100, 200, 255); // Light blue
       break;
     case GUIDE_HOLD:
       phaseDuration = HOLD_DURATION;
       phaseText = "HOLD";
-      phaseColor = tft.color565(200, 100, 255); // Purple
+      phaseColor = rgb565(200, 100, 255); // Purple
       break;
     case GUIDE_EXHALE:
       phaseDuration = EXHALE_DURATION;
       phaseText = "BREATHE OUT";
-      phaseColor = tft.color565(100, 255, 200); // Cyan-green
+      phaseColor = rgb565(100, 255, 200); // Cyan-green
       break;
   }
 
@@ -91,51 +91,54 @@ void drawGuidedMode(BreathData& breathData) {
       break;
   }
 
-  // Clear screen
-  tft.fillScreen(ST77XX_BLACK);
+  // Clear canvas
+  canvas.fillScreen(ST77XX_BLACK);
 
   // Draw pulsing guide circle (multiple rings for depth)
   int centerX = SCREEN_WIDTH / 2;
   int centerY = SCREEN_HEIGHT / 2;
 
   // Outer glow
-  tft.drawCircle(centerX, centerY, radius + 3, tft.color565(50, 50, 100));
-  tft.drawCircle(centerX, centerY, radius + 2, tft.color565(80, 80, 120));
+  canvas.drawCircle(centerX, centerY, radius + 3, rgb565(50, 50, 100));
+  canvas.drawCircle(centerX, centerY, radius + 2, rgb565(80, 80, 120));
 
   // Main circle
-  tft.fillCircle(centerX, centerY, radius, phaseColor);
+  canvas.fillCircle(centerX, centerY, radius, phaseColor);
 
   // Inner highlight
   int highlightRadius = radius / 2;
-  uint16_t highlightColor = tft.color565(255, 255, 255);
-  tft.fillCircle(centerX - radius/4, centerY - radius/4, highlightRadius, highlightColor);
+  uint16_t highlightColor = rgb565(255, 255, 255);
+  canvas.fillCircle(centerX - radius/4, centerY - radius/4, highlightRadius, highlightColor);
 
   // Draw phase instruction text
-  tft.setTextSize(1);
-  tft.setTextColor(ST77XX_WHITE);
+  canvas.setTextSize(1);
+  canvas.setTextColor(ST77XX_WHITE);
 
   // Center the text
   int textWidth = strlen(phaseText) * 6; // Approximate char width
-  tft.setCursor((SCREEN_WIDTH - textWidth) / 2, 15);
-  tft.print(phaseText);
+  canvas.setCursor((SCREEN_WIDTH - textWidth) / 2, 15);
+  canvas.print(phaseText);
 
   // Draw progress bar at bottom
   int barWidth = (SCREEN_WIDTH - 20) * progress;
-  tft.fillRect(10, SCREEN_HEIGHT - 15, barWidth, 5, phaseColor);
-  tft.drawRect(10, SCREEN_HEIGHT - 15, SCREEN_WIDTH - 20, 5, ST77XX_WHITE);
+  canvas.fillRect(10, SCREEN_HEIGHT - 15, barWidth, 5, phaseColor);
+  canvas.drawRect(10, SCREEN_HEIGHT - 15, SCREEN_WIDTH - 20, 5, ST77XX_WHITE);
 
   // Draw time remaining
   int secondsRemaining = (phaseDuration - phaseElapsed) / 1000 + 1;
-  tft.setCursor(SCREEN_WIDTH / 2 - 6, SCREEN_HEIGHT - 25);
-  tft.setTextSize(2);
-  tft.setTextColor(ST77XX_WHITE);
-  tft.print(secondsRemaining);
+  canvas.setCursor(SCREEN_WIDTH / 2 - 6, SCREEN_HEIGHT - 25);
+  canvas.setTextSize(2);
+  canvas.setTextColor(ST77XX_WHITE);
+  canvas.print(secondsRemaining);
 
   // Draw mode indicator and breath count
-  tft.setTextSize(1);
-  tft.setCursor(4, 4);
-  tft.print("GUIDED");
+  canvas.setTextSize(1);
+  canvas.setCursor(4, 4);
+  canvas.print("GUIDED");
 
-  tft.setCursor(SCREEN_WIDTH - 25, 4);
-  tft.print(breathData.breathCount);
+  canvas.setCursor(SCREEN_WIDTH - 25, 4);
+  canvas.print(breathData.breathCount);
+
+  // Blit canvas to display
+  displayBlit();
 }
