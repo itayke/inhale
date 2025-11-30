@@ -97,7 +97,11 @@ void drawDiagnostic(float pressureDelta) {
   float temp = getTemperature();
   canvas.print(temp, 1);
   canvas.setTextSize(1);
-  canvas.print(" C");
+  canvas.print("C ");
+  canvas.setTextColor(ST77XX_YELLOW);
+  float tempF = temp * 9.0 / 5.0 + 32.0;
+  canvas.print(tempF, 1);
+  canvas.print("F");
 
   // Blit canvas to display
   displayBlit();

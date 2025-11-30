@@ -25,7 +25,6 @@
 
 // Custom color definitions (not in all ST7735 library versions)
 #define ST77XX_GRAY   0x8410  // RGB(128, 128, 128)
-#define ST77XX_ORANGE 0xFD20  // RGB(255, 165, 0)
 
 // ========================================
 // Application Modes
