@@ -68,3 +68,7 @@ float getPressureDelta() {
 float getTemperature() {
   return currentTemperature;
 }
+
+float getAbsolutePressure() {
+  return currentPressure;
+}

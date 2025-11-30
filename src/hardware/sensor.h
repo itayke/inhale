@@ -16,4 +16,7 @@ float getPressureDelta();
 // Get current temperature in Celsius
 float getTemperature();
 
+// Get absolute pressure in Pascals
+float getAbsolutePressure();
+
 #endif // SENSOR_H

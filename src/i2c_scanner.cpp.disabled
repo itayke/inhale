@@ -6,7 +6,7 @@ void setup() {
   delay(1000);
   Serial.println("\n\nI2C Scanner");
   Serial.println("===========");
-  Wire.begin(32, 33);  // SDA=D32, SCL=D33
+  Wire.begin(5, 19);  // SDA=D5, SCL=D19
 }
 
 void loop() {
@@ -31,7 +31,7 @@ void loop() {
 
   if (devicesFound == 0) {
     Serial.println("  No I2C devices found!");
-    Serial.println("  Check wiring: SDA->D32, SCL->D33, VCC->3.3V, GND->GND");
+    Serial.println("  Check wiring: SDA->D5, SCL->D19, VCC->3.3V, GND->GND");
   } else {
     Serial.print("  Total: ");
     Serial.print(devicesFound);
