@@ -14,8 +14,8 @@
 #define TFT_SCLK  18
 
 // BMP280 Sensor (I2C)
-#define BMP_SDA   5
-#define BMP_SCL   19
+#define BMP_SDA   21
+#define BMP_SCL   22
 
 // ========================================
 // Display Configuration
