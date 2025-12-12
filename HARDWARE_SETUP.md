@@ -199,7 +199,7 @@ ST7735S display initialized
 
 1. Check all 7 SPI connections
 2. Verify display is 3.3V model
-3. Try different display initialization in `hardware/display.cpp`:
+3. Try different display initialization in `Display.cpp`:
    ```cpp
    tft.initR(INITR_BLACKTAB);  // Instead of INITR_144GREENTAB
    ```

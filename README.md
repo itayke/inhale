@@ -32,20 +32,13 @@ ESP32-based interactive breathing visualization system using pressure sensing an
 - Real-time pressure monitoring
 - Automatic baseline calibration
 - Inhale/Exhale/Hold detection
-- Session tracking (breath count, duration, patterns)
+- Asymmetric breath normalization (-1 to +1)
+- Auto-expanding calibration bounds
+- Session tracking (breath count, duration)
 
 ### Visualization Modes
-- **Live Mode**: Real-time wave/water visualization
-- **Guided Mode**: Paced breathing exercises
-- **Calibration Mode**: Set personal pressure thresholds
-- **Stats Mode**: View session metrics
-
-### Breath Gesture Navigation
-- **Long Exhale** (1.5+ sec): Next mode
-- **Long Inhale** (1.5+ sec): Previous mode
-- **Breath Hold** (5+ sec): Reset session
-
-(Physical button support can be added later)
+- **Live Mode**: Real-time wave/water visualization responding to breath
+- **Diagnostic Mode**: Raw sensor data, normalized values, calibration bounds
 
 ## Setup
 
@@ -71,31 +64,35 @@ See **[HARDWARE_SETUP.md](HARDWARE_SETUP.md)** for detailed wiring instructions 
 
 ## Project Structure
 
-The codebase uses a modular architecture for maintainability:
+The codebase uses a class-based architecture:
 
 ```
 src/
 ├── main.cpp              # Application orchestration
 ├── config.h              # Configuration & constants
-├── hardware/             # Hardware abstraction (display, sensor, storage)
-├── detection/            # Breath & gesture detection algorithms
-└── modes/                # Visualization modes (live, guided, calib, stats)
+├── BreathData.cpp/h      # Breath detection, normalization, session tracking
+├── Display.cpp/h         # ST7735S display wrapper with double-buffering
+├── PressureSensor.cpp/h  # BMP280 sensor interface
+├── Storage.cpp/h         # NVS persistent storage
+└── modes/
+    ├── live_mode.cpp/h       # Wave visualization
+    └── diagnostic_mode.cpp/h # Sensor diagnostics
 ```
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed module documentation.
 
 ## Development Status
 
-- [x] Modular architecture
+- [x] Class-based architecture
 - [x] Hardware initialization
-- [x] Pressure reading & calibration
+- [x] Pressure reading & baseline calibration
 - [x] Breath detection algorithm
-- [x] Gesture recognition
+- [x] Asymmetric breath normalization
+- [x] Auto-expanding calibration bounds
 - [x] Wave/water visualization
-- [x] Guided breathing mode (4-7-8 pattern)
-- [x] Calibration UI
-- [x] Session statistics tracking
+- [x] Diagnostic mode
 - [x] NVS persistent storage
+- [ ] Game mechanics (in progress)
 
 ## Data Persistence
 
@@ -109,5 +106,4 @@ Uses ESP32 NVS (Non-Volatile Storage) for:
 Connect at 115200 baud to see debug output including:
 - Pressure readings
 - Breath state changes
-- Gesture detection
 - Calibration values

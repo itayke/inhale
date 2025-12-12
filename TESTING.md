@@ -33,95 +33,59 @@ The device starts in **LIVE** mode showing the animated wave.
 **Test breathing:**
 1. **Inhale** (suck through tube) - Wave should drop, turn deep blue
 2. **Exhale** (blow into tube) - Wave should rise, turn cyan
-3. **Hold breath** - Wave should stabilize
+3. **Hold breath** - Wave should stabilize, turn purple after 3s
 
-**Watch serial monitor** for breath state changes:
-- "BREATH_INHALE"
-- "BREATH_EXHALE"
-- "BREATH_HOLD"
-- Breath count increments
+**Watch serial monitor** for breath state changes and calibration values.
+
+### Normalization
+
+The system uses asymmetric normalization:
+- Inhale maps to -1 (at max observed inhale strength)
+- Exhale maps to +1 (at max observed exhale strength)
+- Calibration bounds auto-expand as you breathe
+
+**Test normalization:**
+1. Start breathing normally
+2. Watch min/max bounds in diagnostic mode
+3. Breathe more forcefully - bounds should expand
+4. Normalized value should stay within -1 to +1
 
 ### Sensitivity Issues?
 
 If breath detection is too sensitive or not sensitive enough:
 
-**Option 1: Run Calibration Mode**
-1. Long exhale (1.5+ seconds) → Navigate to CALIBRATION mode
-2. Take 3-5 deep breaths through the tube
-3. Watch the pressure bar and thresholds adjust
-4. Hold breath for 5 seconds to save
-
-**Option 2: Manually adjust in code** (src/main.cpp:54-55)
+**Adjust thresholds in code** (`config.h`):
 ```cpp
-float inhaleThreshold = -5.0;   // More negative = less sensitive
-float exhaleThreshold = 5.0;    // More positive = less sensitive
+#define DEFAULT_INHALE_THRESHOLD  -5.0f   // More negative = less sensitive
+#define DEFAULT_EXHALE_THRESHOLD   5.0f   // More positive = less sensitive
 ```
-
-## Testing Gesture Navigation
-
-### Mode Switching
-
-**Long Exhale (1.5s)** → Next mode
-- LIVE → GUIDED → CALIBRATION → STATS → LIVE...
-
-**Long Inhale (1.5s)** → Previous mode
-- LIVE → STATS → CALIBRATION → GUIDED → LIVE...
-
-**Watch for**:
-- Mode name appears on screen briefly
-- Serial output: "GESTURE: Long exhale -> Mode: GUIDED"
-
-**Not triggering?**
-- Gestures are debounced (1s cooldown)
-- Must hold breath for full 1.5 seconds
-- Try exhaling/inhaling more forcefully
-
-### Session Reset
-
-**Breath Hold (5s)** → Reset session statistics
-
-**Expected:**
-- "SESSION RESET" appears on screen
-- Breath count returns to 0
-- Serial: "GESTURE: Breath hold -> Reset session"
 
 ## Testing Each Mode
 
 ### LIVE Mode
-- ✓ Wave animates smoothly
-- ✓ Wave height responds to breathing
-- ✓ Colors change with breath state
-- ✓ Breath count increments
-- ✓ State indicator (IN/OUT/HLD) updates
+- Wave animates smoothly
+- Wave height responds to breathing (normalized)
+- Colors change with breath state:
+  - Inhale: Deep blue
+  - Exhale: Cyan
+  - Hold: Purple
+  - Idle: Medium blue
+- Breath count increments on exhale-to-inhale transition
+- State indicator (IN/OUT/HLD/...) updates
 
-### GUIDED Mode
-- ✓ Circle expands during INHALE phase (4s)
-- ✓ Circle stays full during HOLD phase (7s)
-- ✓ Circle contracts during EXHALE phase (8s)
-- ✓ Progress bar shows phase progress
-- ✓ Countdown timer shows seconds remaining
-- ✓ Colors change per phase
-
-### CALIBRATION Mode
-- ✓ Real-time pressure bar moves with breathing
-- ✓ Min/max markers track extremes
-- ✓ Threshold lines auto-adjust (70% of extremes)
-- ✓ Numeric values update
-- ✓ 5s breath hold saves and returns to LIVE
-
-### STATS Mode
-- ✓ Total breaths displayed large
-- ✓ Breaths/min calculated correctly
-- ✓ Average breath duration shown
-- ✓ Session time counts up
-- ✓ Mini live indicator shows current breath state
+### DIAGNOSTIC Mode
+- Pressure delta updates in real-time
+- Normalized value bar moves with breathing
+- Absolute pressure displayed in inHg
+- Temperature shown in both C and F
+- Min/Max calibration bounds shown at bottom
 
 ## Common Issues & Solutions
 
 ### Display Issues
 
 **Garbled/shifted display:**
-- Try different `INITR_` flag in main.cpp:140:
+- Try different `INITR_` flag in `Display.cpp`:
   ```cpp
   tft.initR(INITR_144GREENTAB);  // or try:
   // tft.initR(INITR_BLACKTAB);
@@ -129,7 +93,7 @@ float exhaleThreshold = 5.0;    // More positive = less sensitive
   ```
 
 **Display flickers:**
-- Reduce update rate in loop delay (main.cpp:125)
+- Display uses double-buffering, so flickering is unlikely
 - Check power supply - display needs stable 3.3V
 
 ### Pressure Sensor Issues
@@ -137,94 +101,64 @@ float exhaleThreshold = 5.0;    // More positive = less sensitive
 **Baseline keeps drifting:**
 - Temperature changes affect readings
 - Seal your breathing chamber better
-- Re-calibrate baseline on startup
+- BMP280 has hardware filtering (FILTER_X16) to reduce noise
 
 **No pressure changes detected:**
-- Check tube connection to sensor
+- Check tube connection to sensor chamber
 - Verify chamber is sealed
 - Try blocking tube with finger - should show pressure change
 
 **Readings noisy:**
-- Increase filtering in main.cpp:151:
-  ```cpp
-  bmp.setSampling(...,
-    Adafruit_BMP280::FILTER_X16  // Increase to FILTER_X16
-  );
-  ```
+- BMP280 is configured with maximum filtering
+- Check chamber seal
+- Ensure stable power supply
 
-### Gesture Problems
+### Normalization Issues
 
-**Gestures too easy to trigger accidentally:**
-- Increase durations in main.cpp:290, 323, 356
-  ```cpp
-  if (breathDuration > 2000) {  // Change to 2500 or 3000
-  ```
+**Values stuck at 0:**
+- Min/max bounds need to exceed 0.1 Pa threshold
+- Breathe more forcefully to establish bounds
 
-**Gestures don't trigger:**
-- Decrease durations
-- Check you're breathing forcefully enough to cross thresholds
-- Monitor serial output to see if breath states are detected
+**Values always at extremes (-1 or +1):**
+- Initial bounds are -10/+10 Pa
+- As you breathe, bounds expand to match your range
+- This is expected behavior - normalization adapts to you
 
 ## Optimization Tips
 
 ### Performance
 
 **If display updates are slow:**
-- Wave drawing is expensive - reduce complexity
-- Lower FPS in drawWave() (currently 30 FPS)
-- Use faster ESP32 variant or overclock
-
-### Battery Life (future enhancement)
-
-Ideas for low-power operation:
-- Lower display brightness
-- Reduce update rates
-- Add sleep mode after inactivity
-- Use ESP32 deep sleep with motion wake
+- Wave drawing uses double-buffering at 30 FPS
+- Diagnostic mode runs at 10 FPS
+- Both are optimized for smooth operation
 
 ### Advanced Tuning
 
-**Breath detection algorithm** (main.cpp:234-262):
-- `inhaleThreshold` / `exhaleThreshold`: Adjust sensitivity
-- Breath cycle counting logic
-- Hold detection timeout (currently 3s)
+**Breath detection** (`config.h`):
+- `DEFAULT_INHALE_THRESHOLD` / `DEFAULT_EXHALE_THRESHOLD`: Detection sensitivity
+- `BREATH_HOLD_TIMEOUT_MS`: Time before hold state triggers (default 3s)
+- `BREATH_HOLD_STABILITY_PA`: Pressure stability threshold for hold detection
 
-**Visual adjustments:**
-- Wave amplitude multiplier (main.cpp:461)
-- Color schemes per mode
-- Animation speeds
+**Update rates** (`config.h`):
+- `MAIN_LOOP_DELAY_MS`: Main loop timing (default 20ms = ~50Hz)
+- `WAVE_UPDATE_FPS`: Live mode refresh rate (default 30)
+- `DIAGNOSTIC_UPDATE_FPS`: Diagnostic mode refresh rate (default 10)
 
-## Next Steps
-
-Once everything works:
-
-1. **Add physical buttons** (optional):
-   - Connect to GPIO pins
-   - Add debouncing logic
-   - Map to mode switching
-
-2. **Enhance features**:
-   - Save session history to NVS
-   - Multiple breathing patterns in guided mode
-   - Biofeedback games/challenges
-   - Bluetooth data export
-
-3. **Build an enclosure**:
-   - 3D print or laser-cut case
-   - Mount display on front
-   - Integrate breathing chamber
-   - Add button cutouts if using physical controls
+**Visual adjustments** (`live_mode.cpp`):
+- `maxDisplacement`: Wave height range (default 50 pixels)
+- Wave colors per breath state
 
 ## Debugging Checklist
 
 - [ ] Serial monitor shows no errors on boot
-- [ ] Display shows calibration screen, then LIVE mode
+- [ ] Display shows calibration message, then LIVE mode
 - [ ] Pressure readings change when breathing through tube
 - [ ] Breath states (IN/OUT/HLD) detected correctly
-- [ ] Gestures navigate between modes
-- [ ] All 4 modes render correctly
-- [ ] Calibration saves and persists across reboots
-- [ ] Session stats accurate
+- [ ] Wave responds to breathing in LIVE mode
+- [ ] Normalized values shown correctly in DIAGNOSTIC mode
+- [ ] Min/max bounds expand with breathing
+- [ ] Calibration thresholds persist across reboots
 
 **Still having issues?** Check:
 - PlatformIO library versions
