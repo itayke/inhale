@@ -1,6 +1,7 @@
 #include "live_mode.h"
 #include "../config.h"
-#include "../hardware/display.h"
+#include "../Display.h"
+#include "../PressureSensor.h"
 #include <Arduino.h>
 
 void drawLiveMode(const BreathData& breathData, float pressureDelta) {
@@ -14,46 +15,46 @@ void drawLiveMode(const BreathData& breathData, float pressureDelta) {
   float dt = (now - lastUpdate) / 1000.0;
   lastUpdate = now;
 
-  GFXcanvas16& canvas = getCanvas();
+  GFXcanvas16& canvas = display.getCanvas();
 
   // Animate wave phase (horizontal scroll)
   wavePhase += 2.5 * dt;
   if (wavePhase > TWO_PI) wavePhase -= TWO_PI;
 
-  // Calculate target wave height based on pressure
-  // Inhale (negative pressure) = wave drops
-  // Exhale (positive pressure) = wave rises
-  float pressureInfluence = constrain(pressureDelta * 1.5, -50, 50);
-  targetWaveHeight = (SCREEN_HEIGHT / 2) + pressureInfluence;
+  // Calculate target wave height based on normalized pressure (-1 to +1)
+  // Inhale (negative) = wave drops, Exhale (positive) = wave rises
+  float normalized = pressureSensor.getNormalized();
+  float maxDisplacement = 50.0f;  // Max pixels from center
+  targetWaveHeight = (SCREEN_HEIGHT / 2) + (normalized * maxDisplacement);
 
   // Smooth interpolation for organic movement
   currentWaveHeight += (targetWaveHeight - currentWaveHeight) * 0.1;
 
   // Determine wave colors based on breath state
   uint16_t waterColor, foamColor;
-  switch (breathData.currentState) {
+  switch (breathData.getState()) {
     case BREATH_INHALE:
-      waterColor = rgb565(0, 100, 200);    // Deep blue
-      foamColor = rgb565(100, 150, 255);   // Light blue
+      waterColor = Display::rgb565(0, 100, 200);    // Deep blue
+      foamColor = Display::rgb565(100, 150, 255);   // Light blue
       break;
     case BREATH_EXHALE:
-      waterColor = rgb565(0, 150, 200);    // Cyan
-      foamColor = rgb565(150, 255, 255);   // Bright cyan
+      waterColor = Display::rgb565(0, 150, 200);    // Cyan
+      foamColor = Display::rgb565(150, 255, 255);   // Bright cyan
       break;
     case BREATH_HOLD:
-      waterColor = rgb565(100, 0, 150);    // Purple
-      foamColor = rgb565(200, 100, 255);   // Light purple
+      waterColor = Display::rgb565(100, 0, 150);    // Purple
+      foamColor = Display::rgb565(200, 100, 255);   // Light purple
       break;
     default:
-      waterColor = rgb565(0, 120, 180);    // Medium blue
-      foamColor = rgb565(120, 180, 255);   // Sky blue
+      waterColor = Display::rgb565(0, 120, 180);    // Medium blue
+      foamColor = Display::rgb565(120, 180, 255);   // Sky blue
       break;
   }
 
   // Draw sky gradient to canvas
   for (int y = 0; y < SCREEN_HEIGHT; y++) {
     uint8_t brightness = map(y, 0, SCREEN_HEIGHT, 60, 20);
-    uint16_t skyColor = rgb565(brightness, brightness, brightness + 30);
+    uint16_t skyColor = Display::rgb565(brightness, brightness, brightness + 30);
     canvas.drawFastHLine(0, y, SCREEN_WIDTH, skyColor);
   }
 
@@ -88,11 +89,11 @@ void drawLiveMode(const BreathData& breathData, float pressureDelta) {
   // Breath count
   canvas.setCursor(4, SCREEN_HEIGHT - 10);
   canvas.print("Breaths: ");
-  canvas.print(breathData.breathCount);
+  canvas.print(breathData.getBreathCount());
 
   // Breath state indicator (top right)
   const char* stateText;
-  switch (breathData.currentState) {
+  switch (breathData.getState()) {
     case BREATH_INHALE: stateText = "IN "; break;
     case BREATH_EXHALE: stateText = "OUT"; break;
     case BREATH_HOLD:   stateText = "HLD"; break;
@@ -102,5 +103,5 @@ void drawLiveMode(const BreathData& breathData, float pressureDelta) {
   canvas.print(stateText);
 
   // Blit canvas to display
-  displayBlit();
+  display.blit();
 }

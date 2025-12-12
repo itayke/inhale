@@ -51,14 +51,6 @@ enum BreathState {
 #define BREATH_HOLD_STABILITY_PA   2.0f
 
 // ========================================
-// Gesture Detection
-// ========================================
-#define GESTURE_LONG_BREATH_MS    1500
-#define GESTURE_HOLD_MENU_MS      5000
-#define GESTURE_DEBOUNCE_MS       1000
-#define GESTURE_PUFF_WINDOW_MS    1000
-
-// ========================================
 // Update Rates
 // ========================================
 #define MAIN_LOOP_DELAY_MS        20    // ~50Hz

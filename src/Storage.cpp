@@ -1,15 +1,16 @@
-#include "storage.h"
-#include "../config.h"
+#include "Storage.h"
+#include "config.h"
 #include <Preferences.h>
+#include <Arduino.h>
 
 static Preferences preferences;
 
-void storageInit() {
+void Storage::init() {
   preferences.begin("inhale", false);
   Serial.println("NVS storage initialized");
 }
 
-void loadCalibration(float& inhaleThreshold, float& exhaleThreshold) {
+void Storage::loadCalibration(float& inhaleThreshold, float& exhaleThreshold) {
   inhaleThreshold = preferences.getFloat("inhaleThresh", DEFAULT_INHALE_THRESHOLD);
   exhaleThreshold = preferences.getFloat("exhaleThresh", DEFAULT_EXHALE_THRESHOLD);
 
@@ -20,7 +21,7 @@ void loadCalibration(float& inhaleThreshold, float& exhaleThreshold) {
   Serial.println(" Pa");
 }
 
-void saveCalibration(float inhaleThreshold, float exhaleThreshold) {
+void Storage::saveCalibration(float inhaleThreshold, float exhaleThreshold) {
   preferences.putFloat("inhaleThresh", inhaleThreshold);
   preferences.putFloat("exhaleThresh", exhaleThreshold);
 

@@ -1,10 +1,9 @@
 #include <Arduino.h>
 #include "config.h"
-#include "hardware/display.h"
-#include "hardware/sensor.h"
-#include "hardware/storage.h"
-#include "detection/breath.h"
-#include "detection/gesture.h"
+#include "BreathData.h"
+#include "Display.h"
+#include "PressureSensor.h"
+#include "Storage.h"
 #include "modes/live_mode.h"
 #include "modes/diagnostic_mode.h"
 
@@ -13,13 +12,16 @@
 // ========================================
 AppMode currentMode = MODE_LIVE;
 BreathData breathData;
+Display display;
+PressureSensor pressureSensor;
+Storage storage;
 unsigned long lastModeChangeTime = 0;
 
 // ========================================
 // Helper Functions
 // ========================================
 void showModeTransition(AppMode mode) {
-  Adafruit_ST7735& tft = getDisplay();
+  Adafruit_ST7735& tft = display.getTft();
   tft.fillScreen(ST77XX_BLACK);
   tft.setCursor(20, 60);
   tft.setTextSize(2);
@@ -48,19 +50,18 @@ void setup() {
   Serial.println("====================================");
 
   // Initialize hardware (sensor first to avoid I2C conflicts)
-  sensorInit();
-  displayInit();
-  storageInit();
+  pressureSensor.init();
+  display.init();
+  storage.init();
 
-  // Initialize detection systems
-  breathInit(breathData);
-  gestureInit();
+  // Initialize breath detection
+  breathData.init();
 
   // Load calibration from storage
-  loadCalibration(breathData.inhaleThreshold, breathData.exhaleThreshold);
+  storage.loadCalibration(breathData.inhaleThreshold, breathData.exhaleThreshold);
 
   // Calibrate baseline
-  calibrateBaseline();
+  pressureSensor.calibrateBaseline();
 
   // Initialize mode change timer
   lastModeChangeTime = millis();
@@ -73,36 +74,11 @@ void setup() {
 // ========================================
 void loop() {
   // Update sensor readings
-  updatePressure();
-  float pressureDelta = getPressureDelta();
+  pressureSensor.update();
+  float pressureDelta = pressureSensor.getDelta();
 
   // Detect breath state
-  detectBreath(breathData, pressureDelta);
-
-  // Detect gestures and handle mode changes
-  GestureType gesture = detectGestures(breathData);
-
-  switch (gesture) {
-    case GESTURE_NEXT_MODE:
-    case GESTURE_PREV_MODE:
-      // Toggle between 2 modes
-      currentMode = (AppMode) ((currentMode == MODE_LIVE) ? MODE_DIAGNOSTIC : MODE_LIVE);
-      showModeTransition(currentMode);
-      lastModeChangeTime = millis();
-      Serial.print("Mode changed to: ");
-      Serial.println(currentMode);
-      break;
-
-    case GESTURE_RESET_SESSION:
-      resetSession(breathData);
-      displayShowMessage("SESSION\n RESET", ST77XX_GREEN);
-      delay(1000);
-      break;
-
-    case GESTURE_NONE:
-    default:
-      break;
-  }
+  breathData.detect(pressureDelta);
 
   // Update display based on current mode
   switch (currentMode) {
