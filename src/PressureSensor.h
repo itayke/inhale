@@ -12,9 +12,6 @@ public:
   // Update current pressure reading (call every loop)
   void update();
 
-  // Get normalized pressure: -1 (max inhale) to +1 (max exhale)
-  float getNormalized() const { return normalizedPressure; }
-
   // Get raw pressure delta from baseline (in Pascals)
   float getDelta() const { return pressureDelta; }
 
@@ -24,23 +21,11 @@ public:
   // Get current temperature in Celsius
   float getTemperature() const { return currentTemperature; }
 
-  // Calibration min/max (for diagnostics)
-  float getMinDelta() const { return minPressureDelta; }
-  float getMaxDelta() const { return maxPressureDelta; }
-
-  // Reset min/max calibration
-  void resetCalibration();
-
 private:
   float baselinePressure = 0;
   float currentPressure = 0;
   float currentTemperature = 0;
   float pressureDelta = 0;
-  float normalizedPressure = 0;
-
-  // Calibration bounds for normalization
-  float minPressureDelta = -10.0f;  // Initial estimate (inhale)
-  float maxPressureDelta = 10.0f;   // Initial estimate (exhale)
 };
 
 // Global sensor instance (defined in main.cpp)

@@ -14,12 +14,22 @@ public:
   // Reset session statistics
   void resetSession();
 
+  // Reset min/max calibration bounds
+  void resetCalibration();
+
   // Getters
   BreathState getState() const { return currentState; }
   int getBreathCount() const { return breathCount; }
   float getAverageBreathDuration() const { return averageBreathDuration; }
   unsigned long getSessionStartTime() const { return sessionStartTime; }
   unsigned long getBreathStartTime() const { return breathStartTime; }
+
+  // Normalized breath: -1 (max inhale) to +1 (max exhale)
+  float getNormalizedBreath() const { return normalizedBreath; }
+
+  // Calibration bounds (for diagnostics)
+  float getMinDelta() const { return minPressureDelta; }
+  float getMaxDelta() const { return maxPressureDelta; }
 
   // Calibration thresholds
   float inhaleThreshold;
@@ -32,6 +42,11 @@ private:
   int breathCount = 0;
   float averageBreathDuration = 0;
   unsigned long sessionStartTime = 0;
+
+  // Normalization
+  float normalizedBreath = 0;
+  float minPressureDelta = -10.0f;  // Initial estimate (inhale)
+  float maxPressureDelta = 10.0f;   // Initial estimate (exhale)
 };
 
 // Global breath data instance (defined in main.cpp)

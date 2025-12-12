@@ -1,5 +1,6 @@
 #include "diagnostic_mode.h"
 #include "../config.h"
+#include "../BreathData.h"
 #include "../Display.h"
 #include "../PressureSensor.h"
 
@@ -34,7 +35,7 @@ void drawDiagnosticMode(float pressureDelta) {
   canvas.print(" Pa");
 
   // Normalized value
-  float normalized = pressureSensor.getNormalized();
+  float normalized = breathData.getNormalizedBreath();
   canvas.setCursor(10, 36);
   canvas.setTextColor(ST77XX_WHITE);
   canvas.print("Norm: ");
@@ -88,9 +89,9 @@ void drawDiagnosticMode(float pressureDelta) {
   canvas.setCursor(10, 114);
   canvas.setTextColor(ST77XX_GRAY);
   canvas.print("Min:");
-  canvas.print(pressureSensor.getMinDelta(), 0);
+  canvas.print(breathData.getMinDelta(), 0);
   canvas.print(" Max:");
-  canvas.print(pressureSensor.getMaxDelta(), 0);
+  canvas.print(breathData.getMaxDelta(), 0);
 
   // Blit canvas to display
   display.blit();

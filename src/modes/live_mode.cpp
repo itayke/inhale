@@ -1,10 +1,10 @@
 #include "live_mode.h"
 #include "../config.h"
+#include "../BreathData.h"
 #include "../Display.h"
-#include "../PressureSensor.h"
 #include <Arduino.h>
 
-void drawLiveMode(const BreathData& breathData, float pressureDelta) {
+void drawLiveMode(float pressureDelta) {
   static unsigned long lastUpdate = 0;
   static float wavePhase = 0;
   static float targetWaveHeight = SCREEN_HEIGHT / 2;
@@ -21,9 +21,9 @@ void drawLiveMode(const BreathData& breathData, float pressureDelta) {
   wavePhase += 2.5 * dt;
   if (wavePhase > TWO_PI) wavePhase -= TWO_PI;
 
-  // Calculate target wave height based on normalized pressure (-1 to +1)
+  // Calculate target wave height based on normalized breath (-1 to +1)
   // Inhale (negative) = wave drops, Exhale (positive) = wave rises
-  float normalized = pressureSensor.getNormalized();
+  float normalized = breathData.getNormalizedBreath();
   float maxDisplacement = 50.0f;  // Max pixels from center
   targetWaveHeight = (SCREEN_HEIGHT / 2) + (normalized * maxDisplacement);
 

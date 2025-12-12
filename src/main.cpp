@@ -83,7 +83,7 @@ void loop() {
   // Update display based on current mode
   switch (currentMode) {
     case MODE_LIVE:
-      drawLiveMode(breathData, pressureDelta);
+      drawLiveMode(pressureDelta);
       break;
 
     case MODE_DIAGNOSTIC:

@@ -65,33 +65,5 @@ void PressureSensor::update() {
   currentPressure = bmp.readPressure();
   currentTemperature = bmp.readTemperature();
   pressureDelta = currentPressure - baselinePressure;
-
-  // Auto-expand calibration bounds (with some margin to avoid division issues)
-  if (pressureDelta < minPressureDelta) {
-    minPressureDelta = pressureDelta;
-  }
-  if (pressureDelta > maxPressureDelta) {
-    maxPressureDelta = pressureDelta;
-  }
-
-  // Calculate normalized pressure (-1 to +1)
-  if (pressureDelta < 0 && minPressureDelta < -0.1f) {
-    // Inhale: map [minPressureDelta..0] → [-1..0]
-    normalizedPressure = pressureDelta / (-minPressureDelta);
-  } else if (pressureDelta > 0 && maxPressureDelta > 0.1f) {
-    // Exhale: map [0..maxPressureDelta] → [0..1]
-    normalizedPressure = pressureDelta / maxPressureDelta;
-  } else {
-    normalizedPressure = 0;
-  }
-
-  // Clamp to valid range
-  if (normalizedPressure < -1.0f) normalizedPressure = -1.0f;
-  if (normalizedPressure > 1.0f) normalizedPressure = 1.0f;
-}
-
-void PressureSensor::resetCalibration() {
-  minPressureDelta = -10.0f;
-  maxPressureDelta = 10.0f;
 }
 
