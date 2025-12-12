@@ -95,18 +95,3 @@ void PressureSensor::resetCalibration() {
   maxPressureDelta = 10.0f;
 }
 
-float PressureSensor::getNormalized() const {
-  return normalizedPressure;
-}
-
-float PressureSensor::getDelta() const {
-  return pressureDelta;
-}
-
-float PressureSensor::getAbsolutePressure() const {
-  return currentPressure;
-}
-
-float PressureSensor::getTemperature() const {
-  return currentTemperature;
-}

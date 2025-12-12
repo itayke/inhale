@@ -11,8 +11,17 @@ void Storage::init() {
 }
 
 void Storage::loadCalibration(float& inhaleThreshold, float& exhaleThreshold) {
-  inhaleThreshold = preferences.getFloat("inhaleThresh", DEFAULT_INHALE_THRESHOLD);
-  exhaleThreshold = preferences.getFloat("exhaleThresh", DEFAULT_EXHALE_THRESHOLD);
+  if (preferences.isKey("inhaleThresh")) {
+    inhaleThreshold = preferences.getFloat("inhaleThresh");
+  } else {
+    inhaleThreshold = DEFAULT_INHALE_THRESHOLD;
+  }
+
+  if (preferences.isKey("exhaleThresh")) {
+    exhaleThreshold = preferences.getFloat("exhaleThresh");
+  } else {
+    exhaleThreshold = DEFAULT_EXHALE_THRESHOLD;
+  }
 
   Serial.print("Loaded calibration - Inhale: ");
   Serial.print(inhaleThreshold);

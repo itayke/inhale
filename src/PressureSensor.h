@@ -13,16 +13,16 @@ public:
   void update();
 
   // Get normalized pressure: -1 (max inhale) to +1 (max exhale)
-  float getNormalized() const;
+  float getNormalized() const { return normalizedPressure; }
 
   // Get raw pressure delta from baseline (in Pascals)
-  float getDelta() const;
+  float getDelta() const { return pressureDelta; }
 
   // Get absolute pressure in Pascals
-  float getAbsolutePressure() const;
+  float getAbsolutePressure() const { return currentPressure; }
 
   // Get current temperature in Celsius
-  float getTemperature() const;
+  float getTemperature() const { return currentTemperature; }
 
   // Calibration min/max (for diagnostics)
   float getMinDelta() const { return minPressureDelta; }
