@@ -31,9 +31,7 @@
 // ========================================
 enum AppMode {
   MODE_LIVE,
-  MODE_GUIDED,
-  MODE_CALIBRATION,
-  MODE_STATS
+  MODE_DIAGNOSTIC
 };
 
 // ========================================
@@ -53,20 +51,6 @@ enum BreathState {
 #define BREATH_HOLD_STABILITY_PA   2.0f
 
 // ========================================
-// Guided Breathing
-// ========================================
-enum GuidedPhase {
-  GUIDE_INHALE,
-  GUIDE_HOLD,
-  GUIDE_EXHALE
-};
-
-// Breathing pattern: 4-7-8 (inhale 4s, hold 7s, exhale 8s)
-#define INHALE_DURATION   4000
-#define HOLD_DURATION     7000
-#define EXHALE_DURATION   8000
-
-// ========================================
 // Gesture Detection
 // ========================================
 #define GESTURE_LONG_BREATH_MS    1500
@@ -79,8 +63,6 @@ enum GuidedPhase {
 // ========================================
 #define MAIN_LOOP_DELAY_MS        20    // ~50Hz
 #define WAVE_UPDATE_FPS           30
-#define GUIDED_UPDATE_FPS         30
-#define CALIBRATION_UPDATE_HZ     10
-#define STATS_UPDATE_HZ           1
+#define DIAGNOSTIC_UPDATE_FPS     10
 
 #endif // CONFIG_H
