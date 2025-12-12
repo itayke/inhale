@@ -72,7 +72,7 @@ src/
 ├── config.h              # Configuration & constants
 ├── BreathData.cpp/h      # Breath detection, normalization, session tracking
 ├── Display.cpp/h         # ST7735S display wrapper with double-buffering
-├── PressureSensor.cpp/h  # BMP280 sensor interface
+├── Sensor.cpp/h          # BMP280 sensor interface
 ├── Storage.cpp/h         # NVS persistent storage
 └── modes/
     ├── live_mode.cpp/h       # Wave visualization

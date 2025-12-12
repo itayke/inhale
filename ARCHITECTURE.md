@@ -10,7 +10,7 @@ inhale/
 │   │
 │   ├── BreathData.cpp/h            # Breath detection & normalization
 │   ├── Display.cpp/h               # ST7735S display wrapper
-│   ├── PressureSensor.cpp/h        # BMP280 sensor interface
+│   ├── Sensor.cpp/h                # BMP280 sensor interface
 │   ├── Storage.cpp/h               # NVS persistent storage
 │   │
 │   └── modes/                      # Display modes
@@ -66,7 +66,7 @@ Handles breath detection, normalization, and session tracking.
 
 **Dependencies:** config.h
 
-#### `PressureSensor`
+#### `Sensor`
 
 Low-level BMP280 sensor interface for raw pressure data.
 
@@ -142,7 +142,7 @@ Each mode is a self-contained visualization with its own rendering logic.
 - Temperature in Celsius and Fahrenheit
 - Calibration bounds (min/max)
 
-**Dependencies:** config.h, BreathData, Display, PressureSensor
+**Dependencies:** config.h, BreathData, Display, Sensor
 
 ## Data Flow
 
@@ -153,7 +153,7 @@ Each mode is a self-contained visualization with its own rendering logic.
 └──────────────┬──────────────────────────────┬───────────────┘
                │                              │
      ┌─────────▼─────────┐          ┌────────▼────────┐
-     │  PressureSensor   │          │  Mode Rendering │
+     │      Sensor       │          │  Mode Rendering │
      │    .update()      │          └────────┬────────┘
      └─────────┬─────────┘                   │
                │                    ┌────────▼────────────────┐
@@ -172,11 +172,11 @@ Each mode is a self-contained visualization with its own rendering logic.
 
 ### Class-Based Architecture
 
-Each hardware component and logical unit is encapsulated in a class with clear responsibilities. Global instances are defined in `main.cpp` and declared `extern` in headers.
+Each hardware component and logical unit is encapsulated in a class with clear responsibilities. Global instances are defined in `main.cpp` and declared `extern` in headers (e.g., `Sensor pressureSensor`).
 
 ### Separation of Concerns
 
-- `PressureSensor` handles raw sensor data only
+- `Sensor` handles raw sensor data only
 - `BreathData` handles breath-related processing (normalization, detection)
 - `Display` handles all rendering
 - `Storage` handles persistence
@@ -200,8 +200,8 @@ Display uses a `GFXcanvas16` off-screen buffer. All drawing happens to the canva
 
 ### New Sensor Data
 
-1. Add getter method to `PressureSensor` class
-2. Update `PressureSensor::update()` to read new data
+1. Add getter method to `Sensor` class
+2. Update `Sensor::update()` to read new data
 3. Use in modes as needed
 
 ## Build System

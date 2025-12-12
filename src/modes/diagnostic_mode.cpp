@@ -2,7 +2,7 @@
 #include "../config.h"
 #include "../BreathData.h"
 #include "../Display.h"
-#include "../PressureSensor.h"
+#include "../Sensor.h"
 
 void drawDiagnosticMode(float pressureDelta) {
   static unsigned long lastUpdate = 0;

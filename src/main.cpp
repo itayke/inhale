@@ -2,7 +2,7 @@
 #include "config.h"
 #include "BreathData.h"
 #include "Display.h"
-#include "PressureSensor.h"
+#include "Sensor.h"
 #include "Storage.h"
 #include "modes/live_mode.h"
 #include "modes/diagnostic_mode.h"
@@ -13,7 +13,7 @@
 AppMode currentMode = MODE_LIVE;
 BreathData breathData;
 Display display;
-PressureSensor pressureSensor;
+Sensor pressureSensor;
 Storage storage;
 unsigned long lastModeChangeTime = 0;
 

@@ -1,7 +1,7 @@
-#ifndef PRESSURE_SENSOR_H
-#define PRESSURE_SENSOR_H
+#ifndef SENSOR_H
+#define SENSOR_H
 
-class PressureSensor {
+class Sensor {
 public:
   // Initialize BMP280 sensor
   void init();
@@ -29,6 +29,6 @@ private:
 };
 
 // Global sensor instance (defined in main.cpp)
-extern PressureSensor pressureSensor;
+extern Sensor pressureSensor;
 
-#endif // PRESSURE_SENSOR_H
+#endif // SENSOR_H

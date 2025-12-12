@@ -1,4 +1,4 @@
-#include "PressureSensor.h"
+#include "Sensor.h"
 #include "Display.h"
 #include "config.h"
 #include <Wire.h>
@@ -7,7 +7,7 @@
 // Internal BMP280 handle
 static Adafruit_BMP280 bmp;
 
-void PressureSensor::init() {
+void Sensor::init() {
   Serial.println("Initializing BMP280 sensor...");
 
   delay(100);
@@ -40,7 +40,7 @@ void PressureSensor::init() {
                   Adafruit_BMP280::STANDBY_MS_1); // Standby time
 }
 
-void PressureSensor::calibrateBaseline() {
+void Sensor::calibrateBaseline() {
   Serial.println("Calibrating baseline pressure...");
 
   display.showMessage("Calibrating...\n  Breathe\n  normally", ST77XX_CYAN);
@@ -61,9 +61,8 @@ void PressureSensor::calibrateBaseline() {
   display.clear();
 }
 
-void PressureSensor::update() {
+void Sensor::update() {
   currentPressure = bmp.readPressure();
   currentTemperature = bmp.readTemperature();
   pressureDelta = currentPressure - baselinePressure;
 }
-
