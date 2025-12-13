@@ -58,7 +58,7 @@ See **[HARDWARE_SETUP.md](HARDWARE_SETUP.md)** for detailed wiring instructions 
 3. Connect ESP32 via USB-C
 4. Build and upload:
    ```bash
-   pio run -e esp32dev --target upload
+   pio run --target upload
    pio device monitor
    ```
 
@@ -73,7 +73,7 @@ brew install sdl2
 
 **Build and run:**
 ```bash
-pio run -e simulator
+pio run
 ./.pio/build/simulator/program
 ```
 
