@@ -22,10 +22,11 @@ void drawLiveMode(float pressureDelta) {
   if (wavePhase > TWO_PI) wavePhase -= TWO_PI;
 
   // Calculate target wave height based on normalized breath (-1 to +1)
-  // Inhale (negative) = wave drops, Exhale (positive) = wave rises
+  // Exhale (positive) = wave rises (up), Inhale (negative) = wave drops (down)
   float normalized = breathData.getNormalizedBreath();
   float maxDisplacement = 50.0f;  // Max pixels from center
-  targetWaveHeight = (SCREEN_HEIGHT / 2) + (normalized * maxDisplacement);
+  // Negate so exhale pushes wave up (lower Y), inhale pulls wave down (higher Y)
+  targetWaveHeight = (SCREEN_HEIGHT / 2) - (normalized * maxDisplacement);
 
   // Smooth interpolation for organic movement
   currentWaveHeight += (targetWaveHeight - currentWaveHeight) * 0.1;

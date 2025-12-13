@@ -78,7 +78,7 @@ pio run
 ```
 
 **Controls:**
-- **Mouse Y position**: Simulates breath pressure (up = inhale, down = exhale)
+- **Mouse Y position**: Simulates breath pressure (up = exhale, down = inhale)
 - **Space**: Toggle between Live and Diagnostic modes
 - **ESC / Q**: Quit
 

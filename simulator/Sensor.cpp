@@ -8,8 +8,8 @@ extern SerialMock Serial;
 void Sensor::init() {
   Serial.println("Initializing simulated sensor...");
   Serial.println("Use mouse Y position to simulate breath pressure");
-  Serial.println("  - Move mouse UP = Inhale (negative pressure)");
-  Serial.println("  - Move mouse DOWN = Exhale (positive pressure)");
+  Serial.println("  - Move mouse UP = Exhale (positive pressure)");
+  Serial.println("  - Move mouse DOWN = Inhale (negative pressure)");
   Serial.println("  - Center = Neutral");
   Serial.println("Simulated sensor initialized!");
 
@@ -34,13 +34,14 @@ void Sensor::setMouseY(int mouseY, int windowHeight) {
 void Sensor::update() {
   // Map mouse Y to pressure delta
   // Center of window = 0 Pa
-  // Top of window = -50 Pa (inhale)
-  // Bottom of window = +50 Pa (exhale)
+  // Top of window = +50 Pa (exhale)
+  // Bottom of window = -50 Pa (inhale)
   int centerY = _windowHeight / 2;
   float normalizedY = (float)(_mouseY - centerY) / (float)centerY;  // -1 to +1
 
   // Scale to pressure range (±50 Pa is typical breath range)
-  pressureDelta = normalizedY * 50.0f;
+  // Negate so up = exhale (positive), down = inhale (negative)
+  pressureDelta = -normalizedY * 50.0f;
 
   // Update absolute pressure for display
   currentPressure = baselinePressure + pressureDelta;
