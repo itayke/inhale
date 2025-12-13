@@ -90,18 +90,17 @@ The codebase uses a class-based architecture:
 
 ```
 src/
-├── main.cpp              # Application orchestration
+├── main.cpp              # Shared entry point (ESP32 + Simulator)
 ├── config.h              # Configuration & constants
 ├── BreathData.cpp/h      # Breath detection, normalization, session tracking
-├── Display.cpp/h         # ST7735S display wrapper with double-buffering
-├── Sensor.cpp/h          # BMP280 sensor interface
-├── Storage.cpp/h         # NVS persistent storage
+├── Display.cpp/h         # Display interface (ESP32: ST7735S, Sim: SDL2)
+├── Sensor.cpp/h          # Sensor interface (ESP32: BMP280, Sim: mouse Y)
+├── Storage.cpp/h         # Storage interface (ESP32: NVS, Sim: in-memory)
 └── modes/
-    ├── live_mode.cpp/h       # Wave visualization
-    └── diagnostic_mode.cpp/h # Sensor diagnostics
+    ├── live_mode.cpp/h       # Wave visualization (shared)
+    └── diagnostic_mode.cpp/h # Sensor diagnostics (shared)
 
-simulator/
-├── main.cpp              # SDL2 event loop & simulator entry point
+simulator/                # Platform shims for native build
 ├── Display.cpp           # SDL2 display using GFXcanvas16
 ├── Sensor.cpp            # Mouse Y-based breath simulation
 ├── Storage.cpp           # In-memory storage stub
