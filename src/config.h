@@ -50,6 +50,9 @@ enum BreathState {
 #define BREATH_HOLD_TIMEOUT_MS     3000
 #define BREATH_HOLD_STABILITY_PA   2.0f
 
+// Normalization overage threshold (1.1 = 10% beyond bounds before expanding)
+#define NORM_OVERAGE_THRESHOLD     1.25f
+
 // ========================================
 // Update Rates
 // ========================================

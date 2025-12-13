@@ -31,7 +31,7 @@ void drawDiagnosticMode(float pressureDelta) {
   } else {
     canvas.setTextColor(ST77XX_MAGENTA);
   }
-  canvas.print(pressureDelta, 1);
+  canvas.print(pressureDelta, 2);
   canvas.print(" Pa");
 
   // Normalized value
@@ -48,13 +48,29 @@ void drawDiagnosticMode(float pressureDelta) {
   int maxBarWidth = (SCREEN_WIDTH - 20) / 2;  // Half width for each direction
   int barWidth = abs(normalized) * maxBarWidth;
 
+  // Check if bounds are being pushed (exceeds overage threshold)
+  float minDelta = breathData.getMinDelta();
+  float maxDelta = breathData.getMaxDelta();
+  bool pushingMin = pressureDelta < minDelta * NORM_OVERAGE_THRESHOLD && minDelta < -0.1f;
+  bool pushingMax = pressureDelta > maxDelta * NORM_OVERAGE_THRESHOLD && maxDelta > 0.1f;
+
   canvas.drawFastHLine(10, barY, SCREEN_WIDTH - 20, ST77XX_GRAY);
   canvas.drawFastVLine(barCenter, barY - 5, 10, ST77XX_WHITE);
 
   if (normalized > 0) {
     canvas.fillRect(barCenter, barY - 3, barWidth, 6, ST77XX_CYAN);
+    // Draw arrow if pushing max
+    if (pushingMax) {
+      int arrowX = barCenter + barWidth;
+      canvas.fillTriangle(arrowX, barY - 5, arrowX, barY + 5, arrowX + 6, barY, ST77XX_WHITE);
+    }
   } else {
     canvas.fillRect(barCenter - barWidth, barY - 3, barWidth, 6, ST77XX_MAGENTA);
+    // Draw arrow if pushing min
+    if (pushingMin) {
+      int arrowX = barCenter - barWidth;
+      canvas.fillTriangle(arrowX, barY - 5, arrowX, barY + 5, arrowX - 6, barY, ST77XX_WHITE);
+    }
   }
 
   // Absolute pressure in inHg
@@ -67,7 +83,7 @@ void drawDiagnosticMode(float pressureDelta) {
   canvas.setTextSize(2);
   canvas.setTextColor(ST77XX_GREEN);
   float pressureInHg = pressureSensor.getAbsolutePressure() / 3386.39;  // Pa to inHg
-  canvas.print(pressureInHg, 2);
+  canvas.print(pressureInHg, 3);
   canvas.setTextSize(1);
   canvas.print(" inHg");
 

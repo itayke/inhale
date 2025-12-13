@@ -19,12 +19,17 @@ void BreathData::detect(float pressureDelta) {
   BreathState previousState = currentState;
   unsigned long now = millis();
 
-  // Auto-expand calibration bounds
-  if (pressureDelta < minPressureDelta) {
-    minPressureDelta = pressureDelta;
+  // Expand calibration bounds only when exceeding overage threshold
+  // This filters out small noise spikes that would otherwise shrink normalized values
+  if (pressureDelta < minPressureDelta * NORM_OVERAGE_THRESHOLD && minPressureDelta < -0.1f) {
+    // Inhale exceeds threshold - expand gradually
+    float ratio = pressureDelta / (minPressureDelta * NORM_OVERAGE_THRESHOLD);
+    minPressureDelta *= ratio;
   }
-  if (pressureDelta > maxPressureDelta) {
-    maxPressureDelta = pressureDelta;
+  if (pressureDelta > maxPressureDelta * NORM_OVERAGE_THRESHOLD && maxPressureDelta > 0.1f) {
+    // Exhale exceeds threshold - expand gradually
+    float ratio = pressureDelta / (maxPressureDelta * NORM_OVERAGE_THRESHOLD);
+    maxPressureDelta *= ratio;
   }
 
   // Calculate normalized breath (-1 to +1)

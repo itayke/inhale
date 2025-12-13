@@ -10,7 +10,7 @@
 // ========================================
 // Global Application State
 // ========================================
-AppMode currentMode = MODE_LIVE;
+AppMode currentMode = MODE_DIAGNOSTIC;
 BreathData breathData;
 Display display;
 Sensor pressureSensor;
