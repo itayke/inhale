@@ -15,7 +15,7 @@ void drawLiveMode(float pressureDelta) {
   float dt = (now - lastUpdate) / 1000.0;
   lastUpdate = now;
 
-  GFXcanvas16& canvas = display.getCanvas();
+  Canvas& canvas = display.getCanvas();
 
   // Animate wave phase (horizontal scroll)
   wavePhase += 2.5 * dt;

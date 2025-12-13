@@ -11,7 +11,7 @@ void drawDiagnosticMode(float pressureDelta) {
   if (now - lastUpdate < 100) return;  // 10 FPS
   lastUpdate = now;
 
-  GFXcanvas16& canvas = display.getCanvas();
+  Canvas& canvas = display.getCanvas();
   canvas.fillScreen(ST77XX_BLACK);
 
   // Title

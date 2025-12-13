@@ -1,19 +1,21 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
-#include <Adafruit_ST7735.h>
+// Both platforms use Adafruit GFX canvas
 #include <Adafruit_GFX.h>
+#ifndef SIMULATOR
+  #include <Adafruit_ST7735.h>
+#endif
+
+using Canvas = GFXcanvas16;
 
 class Display {
 public:
-  // Initialize ST7735 display
+  // Initialize display
   void init();
 
-  // Get reference to TFT for direct drawing
-  Adafruit_ST7735& getTft();
-
   // Get reference to canvas for double-buffered drawing
-  GFXcanvas16& getCanvas();
+  Canvas& getCanvas();
 
   // Blit canvas to display
   void blit();
@@ -26,6 +28,11 @@ public:
 
   // Convert RGB to 565 format
   static uint16_t rgb565(uint8_t r, uint8_t g, uint8_t b);
+
+#ifndef SIMULATOR
+  // ESP32 only: Get reference to TFT for direct drawing
+  Adafruit_ST7735& getTft();
+#endif
 };
 
 // Global display instance (defined in main.cpp)

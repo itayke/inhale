@@ -51,16 +51,38 @@ See **[HARDWARE_SETUP.md](HARDWARE_SETUP.md)** for detailed wiring instructions 
 - ST7735S → SPI (GPIO 23, 18, 15, 2, 4)
 - All components use 3.3V power
 
-### Software Upload
+### Software Upload (ESP32)
 
 1. Install [PlatformIO](https://platformio.org/install) or VS Code + PlatformIO extension
 2. Clone this repository
 3. Connect ESP32 via USB-C
 4. Build and upload:
    ```bash
-   pio run --target upload
+   pio run -e esp32dev --target upload
    pio device monitor
    ```
+
+### Desktop Simulator
+
+Test and develop without hardware using the SDL2-based simulator.
+
+**Prerequisites (macOS):**
+```bash
+brew install sdl2
+```
+
+**Build and run:**
+```bash
+pio run -e simulator
+./.pio/build/simulator/program
+```
+
+**Controls:**
+- **Mouse Y position**: Simulates breath pressure (up = inhale, down = exhale)
+- **Space**: Toggle between Live and Diagnostic modes
+- **ESC / Q**: Quit
+
+The simulator uses the real Adafruit GFX library for pixel-perfect rendering that matches the hardware display.
 
 ## Project Structure
 
@@ -77,6 +99,17 @@ src/
 └── modes/
     ├── live_mode.cpp/h       # Wave visualization
     └── diagnostic_mode.cpp/h # Sensor diagnostics
+
+simulator/
+├── main.cpp              # SDL2 event loop & simulator entry point
+├── Display.cpp           # SDL2 display using GFXcanvas16
+├── Sensor.cpp            # Mouse Y-based breath simulation
+├── Storage.cpp           # In-memory storage stub
+├── Platform.h            # millis(), delay(), Serial shims
+├── Arduino.h             # Arduino compatibility layer
+├── Print.h               # Print class for Adafruit GFX
+├── Wire.h                # I2C stub
+└── SPI.h                 # SPI stub
 ```
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed module documentation.
@@ -92,6 +125,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed module documentation.
 - [x] Wave/water visualization
 - [x] Diagnostic mode
 - [x] NVS persistent storage
+- [x] Desktop simulator (SDL2)
 - [ ] Game mechanics (in progress)
 
 ## Data Persistence

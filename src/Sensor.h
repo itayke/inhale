@@ -3,7 +3,7 @@
 
 class Sensor {
 public:
-  // Initialize BMP280 sensor
+  // Initialize sensor
   void init();
 
   // Calibrate baseline pressure (call once at startup)
@@ -20,6 +20,14 @@ public:
 
   // Get current temperature in Celsius
   float getTemperature() const { return currentTemperature; }
+
+#ifdef SIMULATOR
+  // Simulator only: set pressure from mouse Y position
+  void setMouseY(int mouseY, int windowHeight);
+private:
+  int _mouseY = 0;
+  int _windowHeight = 512;
+#endif
 
 private:
   float baselinePressure = 0;
